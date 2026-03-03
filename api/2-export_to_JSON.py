@@ -1,57 +1,37 @@
-#!/usr/bin/python3
 
-"""
-This script retrieves an employee's todo list from the JSONPlaceholder
- API,calculates the number of completed tasks,
-and prints the employee's name, the number of completed tasks,
-and the titles of the completed tasks.
-The script takes the employee ID as a command-line argument and
-uses it to fetch the employee's details and todo list fr
-the JSONPlaceholder API.
-"""
+#!/usr/bin/python3
+"""Script that gets user data (Todo list) from API
+and then export the result to csv file. """
 
 import json
 import requests
 import sys
 
-if __name__ == "__main__":
-    """
-    The main section of the script.
-    """
 
-    # Set the base URL for the JSONPlaceholder API
-    BASE_URL = "https://jsonplaceholder.typicode.com/"
+def main():
+    """main function"""
+    user_id = int(sys.argv[1])
+    todo_url = 'https://jsonplaceholder.typicode.com/todos'
+    user_url = 'https://jsonplaceholder.typicode.com/users/{}'.format(user_id)
 
-    # Get the employee ID from the command-line argument
-    try:
-        USER_ID = int(sys.argv[1])
-    except IndexError:
-        print("Please provide the employee ID as a command-line argument.")
-        sys.exit(1)
-    except ValueError:
-        print("The employee ID must be an integer.")
-        sys.exit(1)
+    response = requests.get(todo_url)
+    user_name = requests.get(user_url).json().get('username')
+    user_data = []
+    output = {user_id: user_data}
 
-    # Get the employee details using the provided ID
-    EMPLOYEE_DATA = requests.get(BASE_URL + f'users/{USER_ID}/').json()
+    for todo in response.json():
+        if todo.get('userId') == user_id:
+            user_data.append(
+                {
+                    "task": todo.get('title'),
+                    "completed": todo.get('completed'),
+                    "username": user_name,
+                })
+    print(output)
+    file_name = "{}.json".format(user_id)
+    with open(file_name, 'w') as file:
+        json.dump(output, file)
 
-    # Get the username
-    USERNAME = EMPLOYEE_DATA.get('username')
 
-    # Get the todo list for the employee
-    employee_todos = requests.get(BASE_URL + f"users/{USER_ID}/todos").json()
-
-    # Initialize a list to store the CSV data
-    json_data = {USER_ID: []}
-    # Export the data to a JSON file
-    for todo in employee_todos:
-        json_data[USER_ID].append({
-            "task": todo.get("title"),
-            "completed": todo.get("completed"),
-            "username": USERNAME
-        })
-
-    json_file_name = f"{USER_ID}.json"
-    with open(json_file_name, 'w') as json_file:
-
-        json.dump(json_data, json_file)
+if __name__ == '__main__':
+    main()

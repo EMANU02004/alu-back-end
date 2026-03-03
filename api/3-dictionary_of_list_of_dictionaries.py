@@ -1,78 +1,37 @@
 #!/usr/bin/python3
-
-"""
-This script retrieves the todo lists for all employees from
-the JSONPlaceholder API,
-and exports the data in a JSON file.
-
-The resulting JSON file will have the following structure:
-{
-  "USER_ID": [
-    {
-      "username": "USERNAME",
-      "task": "TASK_TITLE",
-      "completed": TASK_COMPLETED_STATUS
-    },
-    {
-      "username": "USERNAME",
-      "task": "TASK_TITLE",
-      "completed": TASK_COMPLETED_STATUS
-    },
-    ...
-  ],
-  "USER_ID": [
-    {
-      "username": "USERNAME",
-      "task": "TASK_TITLE",
-      "completed": TASK_COMPLETED_STATUS
-    },
-    {
-      "username": "USERNAME",
-      "task": "TASK_TITLE",
-      "completed": TASK_COMPLETED_STATUS
-    },
-    ...
-  ]
-}
-"""
+"""Script that gets user data (Todo list) from API
+and then export the result to csv file. """
 
 import json
 import requests
 
-if __name__ == "__main__":
-    
-    """
-    The main section of the script.
-    """
 
-    # Set the base URL for the JSONPlaceholder API
-    BASE_URL = "https://jsonplaceholder.typicode.com/"
+def main():
+    """main function"""
+    todo_url = 'https://jsonplaceholder.typicode.com/todos'
 
-    # Get the list of all employees
-    all_employees = requests.get(BASE_URL + "users").json()
+    response = requests.get(todo_url)
 
-    # Initialize the JSON data structure
-    json_data = {}
+    output = {}
 
-    # Iterate through the list of employees
-    for employee in all_employees:
-        USER_ID = employee.get("id")
-        USERNAME = employee.get("username")
+    for todo in response.json():
+        user_id = todo.get('userId')
+        if user_id not in output.keys():
+            output[user_id] = []
+            user_url = 'https://jsonplaceholder.typicode.com/users/{}'.format(
+                user_id)
+            user_name = requests.get(user_url).json().get('username')
 
-        # Get the todo list for the current employee
-        employee_todos = requests.get(
-            BASE_URL + f"users/{USER_ID}/todos").json()
-
-        # Add the employee's todo list to the JSON data structure
-        json_data[USER_ID] = []
-        for todo in employee_todos:
-            json_data[USER_ID].append({
-                "username": USERNAME,
-                "task": todo.get("title"),
-                "completed": todo.get("completed")
+        output[user_id].append(
+            {
+                "username": user_name,
+                "task": todo.get('title'),
+                "completed": todo.get('completed')
             })
 
-    # Export the data to a JSON file
-    json_file_name = "todo_all_employees.json"
-    with open(json_file_name, 'w') as json_file:
-        json.dump(json_data, json_file, indent=2)
+    with open("todo_all_employees.json", 'w') as file:
+        json.dump(output, file)
+
+
+if __name__ == '__main__':
+    main()
