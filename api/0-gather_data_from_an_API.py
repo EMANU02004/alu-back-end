@@ -1,24 +1,23 @@
 #!/usr/bin/python3
-"""Gather data from an API and display employee TODO list progress."""
+"""
+Queries a REST API for a given employee ID 
+and returns TODO list progress.
+"""
 import requests
 import sys
 
 
 if __name__ == "__main__":
-    employee_id = int(sys.argv[1])
-    base_url = "https://jsonplaceholder.typicode.com"
+    url = "https://jsonplaceholder.typicode.com/"
+    employee_id = sys.argv[1]
+    user = requests.get(url + "users/{}".format(employee_id)).json()
+    todos = requests.get(url + "todos", params={"userId": employee_id}).json()
 
-    user = requests.get("{}/users/{}".format(base_url, employee_id)).json()
-    todos = requests.get(
-        "{}/todos".format(base_url), params={"userId": employee_id}
-    ).json()
-
-    employee_name = user.get("name")
-    done_tasks = [t for t in todos if t.get("completed")]
-    total = len(todos)
-    done = len(done_tasks)
-
+    completed = [t.get("title") for t in todos if t.get("completed") is True]
+    
+    # EXACT FORMAT: Employee NAME is done with tasks(DONE/TOTAL):
     print("Employee {} is done with tasks({}/{}):".format(
-        employee_name, done, total))
-    for task in done_tasks:
-        print("\t {}".format(task.get("title")))
+        user.get("name"), len(completed), len(todos)))
+
+    for task in completed:
+        print("\t {}".format(task))
