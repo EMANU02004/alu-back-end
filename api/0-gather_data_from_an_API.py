@@ -7,9 +7,9 @@ import sys
 if __name__ == "__main__":
     employee_id = sys.argv[1]
 
-    base_url = "https://jsonplaceholder.typicode.com"
-    user_url = "{}/users/{}".format(base_url, employee_id)
-    todos_url = "{}/todos?userId={}".format(base_url, employee_id)
+    BASE_URL = "https://jsonplaceholder.typicode.com/"
+    user_url = "{}/users/{}".format(BASE_URL, employee_id)
+    todos_url = "{}/todos?userId={}".format(BASE_URL, employee_id)
 
     user = requests.get(user_url).json()
     todos = requests.get(todos_url).json()
