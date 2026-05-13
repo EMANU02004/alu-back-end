@@ -1,45 +1,37 @@
-
 #!/usr/bin/python3
-"""
-Exports all employees' TODO lists to JSON format.
-"""
+"""Script that gets user data (Todo list) from API
+and then export the result to csv file. """
+
 import json
 import requests
 
 
-if __name__ == "__main__":
-    # Get all users
-    users_response = requests.get(
-        "https://jsonplaceholder.typicode.com/users"
-    )
-    users = users_response.json()
+def main():
+    """main function"""
+    todo_url = 'https://jsonplaceholder.typicode.com/todos'
 
-    # Get all todos
-    todos_response = requests.get(
-        "https://jsonplaceholder.typicode.com/todos"
-    )
-    todos = todos_response.json()
+    response = requests.get(todo_url)
 
-    all_data = {}
+    output = {}
 
-    # Organize tasks by user
-    for user in users:
-        user_id = str(user.get("id"))  # MUST be string
-        username = user.get("username")
+    for todo in response.json():
+        user_id = todo.get('userId')
+        if user_id not in output.keys():
+            output[user_id] = []
+            user_url = 'https://jsonplaceholder.typicode.com/users/{}'.format(
+                user_id)
+            user_name = requests.get(user_url).json().get('username')
 
-        user_tasks = []
+        output[user_id].append(
+            {
+                "username": user_name,
+                "task": todo.get('title'),
+                "completed": todo.get('completed')
+            })
 
-        for task in todos:
-            if task.get("userId") == user.get("id"):
-                task_dict = {
-                    "username": username,
-                    "task": task.get("title"),
-                    "completed": task.get("completed")
-                }
-                user_tasks.append(task_dict)
+    with open("todo_all_employees.json", 'w') as file:
+        json.dump(output, file)
 
-        all_data[user_id] = user_tasks
 
-    # Write to JSON file
-    with open("todo_all_employees.json", "w") as json_file:
-        json.dump(all_data, json_file)
+if __name__ == '__main__':
+    main()
