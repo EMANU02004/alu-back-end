@@ -10,6 +10,7 @@ import sys
 
 
 def main():
+    """Fetch and export employee TODO list to CSV."""
     if len(sys.argv) != 2:
         print("Usage: python3 0-gather_data_from_an_API.py <employee_id>")
         sys.exit(1)
@@ -22,7 +23,6 @@ def main():
 
     base_url = "https://jsonplaceholder.typicode.com"
 
-    # Fetch employee info
     user_resp = requests.get(f"{base_url}/users/{employee_id}")
     if user_resp.status_code != 200:
         sys.exit(1)
@@ -31,9 +31,9 @@ def main():
     user_id = user.get("id")
     username = user.get("username")
 
-    # Fetch todos
-    todos_resp = requests.get(f"{base_url}/todos",
-                              params={"userId": employee_id})
+    todos_resp = requests.get(
+        f"{base_url}/todos", params={"userId": employee_id}
+    )
     if todos_resp.status_code != 200:
         sys.exit(1)
 
@@ -42,7 +42,6 @@ def main():
     filename = f"{user_id}.csv"
     with open(filename, mode="w", newline="", encoding="utf-8") as csvfile:
         writer = csv.writer(csvfile, quoting=csv.QUOTE_ALL)
-
         for task in todos:
             writer.writerow([
                 user_id,
@@ -51,6 +50,6 @@ def main():
                 task.get("title")
             ])
 
+
 if __name__ == "__main__":
     main()
-    
