@@ -1,12 +1,12 @@
 #!/usr/bin/python3
-"""Script to get todos for a user from API"""
+"""Script to get todos for a user from an API."""
 
 import requests
 import sys
 
 
 def main():
-    """main function"""
+    """Fetch and display an employee's TODO list progress."""
     user_id = int(sys.argv[1])
     todo_url = 'https://jsonplaceholder.typicode.com/todos'
     user_url = 'https://jsonplaceholder.typicode.com/users/{}'.format(user_id)
